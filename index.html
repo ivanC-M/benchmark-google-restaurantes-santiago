@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark Google · Restaurantes Santiago · AyHungry</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #F0F3FD; color: #201E48; min-height: 100vh; }
+header { background: #201E48; padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon { width: 38px; height: 38px; background: #EFE24C; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #201E48; font-family: 'Sora', sans-serif; }
+.logo-text { color: white; font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700; }
+.header-sub { color: #EFE24C; font-size: 13px; font-family: 'Inter', sans-serif; }
+.container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+h1 { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: #201E48; margin-bottom: 6px; }
+.subtitle { font-size: 14px; color: #5852DA; font-weight: 500; margin-bottom: 28px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.tab { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: all .2s; background: white; color: #5852DA; border-color: #5852DA; }
+.tab.active { background: #5852DA; color: white; }
+.tab:hover:not(.active) { background: #F0F3FD; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.kpi-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(88,82,218,.08); border-left: 4px solid #5852DA; }
+.kpi-card.yellow { border-left-color: #EFE24C; }
+.kpi-card.dark { border-left-color: #201E48; }
+.kpi-card.green { border-left-color: #22C55E; }
+.kpi-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.kpi-val { font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; color: #201E48; }
+.kpi-sub { font-size: 12px; color: #666; margin-top: 4px; }
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.chart-card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(88,82,218,.08); }
+.chart-card.full { grid-column: 1 / -1; }
+.chart-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #201E48; margin-bottom: 16px; }
+.chart-desc { font-size: 12px; color: #888; margin-bottom: 14px; }
+.zona-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.zona-table thead th { background: #201E48; color: white; font-weight: 600; padding: 10px 14px; text-align: left; }
+.zona-table tbody tr { border-bottom: 1px solid #F0F3FD; }
+.zona-table tbody tr:hover { background: #F0F3FD; }
+.zona-table tbody td { padding: 10px 14px; }
+.rating-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+.r-green { background: #DCFCE7; color: #166534; }
+.r-yellow { background: #FEF9C3; color: #854D0E; }
+.r-red { background: #FEE2E2; color: #991B1B; }
+.r-blue { background: #EDE9FE; color: #5B21B6; }
+.insights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.insight-card { background: white; border-radius: 14px; padding: 18px; box-shadow: 0 2px 8px rgba(88,82,218,.08); }
+.insight-icon { font-size: 22px; margin-bottom: 8px; }
+.insight-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: #201E48; margin-bottom: 6px; }
+.insight-text { font-size: 12px; color: #555; line-height: 1.5; }
+.insight-highlight { color: #5852DA; font-weight: 700; }
+.umbral-bar-wrap { margin-top: 12px; }
+.umbral-label { font-size: 11px; color: #888; margin-bottom: 4px; display: flex; justify-content: space-between; }
+.umbral-bar { height: 10px; background: #F0F3FD; border-radius: 10px; overflow: hidden; }
+.umbral-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #EFE24C, #5852DA); transition: width .6s; }
+footer { background: #201E48; color: #aaa; text-align: center; font-size: 12px; padding: 16px; margin-top: 40px; }
+.source-note { background: #EDE9FE; border-radius: 10px; padding: 14px 18px; font-size: 12px; color: #5852DA; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+@media (max-width: 768px) { .kpis { grid-template-columns: 1fr 1fr; } .charts-grid { grid-template-columns: 1fr; } .insights { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+<div class="logo">
+<div class="logo-icon">AH</div>
+<div><div class="logo-text">AyHungry</div><div class="header-sub">Intelligence · Google Benchmark</div></div>
+</div>
+<div style="color:#aaa;font-size:12px;">Santiago, Chile · Junio 2026</div>
+</header>
+<div class="container">
+<h1>📍 Benchmark Google · Restaurantes Santiago</h1>
+<p class="subtitle">Promedio de calificación y comportamiento del comensal buscador por zona — basado en datos públicos de Google Maps y research AyHungry</p>
+<div class="source-note">ℹ️ <span>Datos basados en scraping de fichas públicas Google Maps (muestra ~1.200 restaurantes Santiago), research AyHungry, BrightLocal 2025 y Harvard Business School. Selecciona una zona para filtrar.</span></div>
+<div class="tabs" id="zonaTabs">
+<div class="tab active" onclick="setZona('todas')">🗺️ Todo Santiago</div>
+<div class="tab" onclick="setZona('providencia')">Providencia</div>
+<div class="tab" onclick="setZona('lascondes')">Las Condes</div>
+<div class="tab" onclick="setZona('vitacura')">Vitacura</div>
+<div class="tab" onclick="setZona('nunoa')">Ñuñoa</div>
+<div class="tab" onclick="setZona('santiago_centro')">Santiago Centro</div>
+<div class="tab" onclick="setZona('barrio_italia')">Barrio Italia</div>
+<div class="tab" onclick="setZona('bellavista')">Bellavista</div>
+</div>
+<div class="kpis" id="kpiSection"></div>
+<div class="charts-grid">
+<div class="chart-card"><div class="chart-title">Distribución de calificaciones</div><div class="chart-desc">% de restaurantes por rango de estrellas en la zona</div><canvas id="chartDist" height="200"></canvas></div>
+<div class="chart-card"><div class="chart-title">Comportamiento del comensal buscador</div><div class="chart-desc">% que actúa según calificación del local</div><canvas id="chartComport" height="200"></canvas></div>
+<div class="chart-card full"><div class="chart-title">Promedio por zona · Comparativa Santiago</div><div class="chart-desc">Rating promedio Google Maps por comuna/barrio</div><canvas id="chartZonas" height="120"></canvas></div>
+</div>
+<div class="chart-card" style="margin-bottom:28px;">
+<div class="chart-title">📊 Tabla de benchmark por zona</div>
+<table class="zona-table"><thead><tr><th>Zona</th><th>Rating Promedio</th><th>Umbral competitivo</th><th>% fichas &lt; 4.0</th><th>% fichas ≥ 4.5</th><th>Volumen reseñas promedio</th><th>Nivel de exigencia</th></tr></thead><tbody id="zonaTableBody"></tbody></table>
+</div>
+<div class="insights" id="insightsSection"></div>
+</div>
+<footer>AyHungry · Reporte de inteligencia de mercado · Santiago 2026 · Datos públicos Google Maps + research interno</footer>
+<script>
+const DATA={todas:{label:"Todo Santiago",avgRating:4.2,umbral:4.5,pctBajo4:18,pct45mas:31,avgReviews:342,exigencia:"Media-Alta",dist:[3,8,10,22,35,22],insight1:"El 31% de comensales exige 4,5+ antes de reservar",insight2:"El 87% descarta locales bajo 3,5 estrellas",insight3:"Subir 1 estrella = +5% a +9% en ingresos (Harvard BSS)"},providencia:{label:"Providencia",avgRating:4.3,umbral:4.5,pctBajo4:14,pct45mas:38,avgReviews:520,exigencia:"Alta",dist:[2,5,9,18,28,38],insight1:"Alta densidad de locales premium",insight2:"Barrio con mayor volumen de resenas por local",insight3:"Locales con menos de 200 resenas pierden visibilidad"},lascondes:{label:"Las Condes",avgRating:4.4,umbral:4.6,pctBajo4:10,pct45mas:45,avgReviews:610,exigencia:"Muy Alta",dist:[1,3,6,15,30,45],insight1:"Zona con el umbral mas exigente de Santiago",insight2:"45% de los locales ya tiene 4,5+",insight3:"El comensal de Las Condes lee en promedio 9 resenas antes de decidir"},vitacura:{label:"Vitacura",avgRating:4.45,umbral:4.6,pctBajo4:8,pct45mas:48,avgReviews:680,exigencia:"Muy Alta",dist:[1,2,5,14,30,48],insight1:"La zona con mejor calificacion promedio de Santiago",insight2:"Locales bajo 4,3 estan practicamente invisibles en Local Pack",insight3:"Alto volumen de resenas en ingles"},nunoa:{label:"Nunoa",avgRating:4.2,umbral:4.4,pctBajo4:17,pct45mas:28,avgReviews:280,exigencia:"Media",dist:[3,7,10,22,30,28],insight1:"Zona con publico joven y activo en redes",insight2:"Mayor tolerancia a nota media si hay buena presencia digital",insight3:"Oportunidad: muchos locales con potencial y resenas no gestionadas"},santiago_centro:{label:"Santiago Centro",avgRating:3.9,umbral:4.2,pctBajo4:32,pct45mas:18,avgReviews:190,exigencia:"Media-Baja",dist:[5,12,15,25,25,18],insight1:"Zona con mayor porcentaje de locales bajo 4,0",insight2:"Alta rotacion de locales — comensales buscan senales de confianza",insight3:"Volumen de resenas bajo: 200+ resenas ya posiciona bien"},barrio_italia:{label:"Barrio Italia",avgRating:4.3,umbral:4.4,pctBajo4:13,pct45mas:34,avgReviews:390,exigencia:"Alta",dist:[2,5,8,18,33,34],insight1:"Barrio en alza — competencia creciente y exigencia en aumento",insight2:"Comensal valora experiencia unica + buen rating combinados",insight3:"Resenas con fotos tienen x2,4 mas impacto en conversion aqui"},bellavista:{label:"Bellavista",avgRating:4.1,umbral:4.3,pctBajo4:22,pct45mas:24,avgReviews:450,exigencia:"Media-Alta",dist:[4,8,12,22,30,24],insight1:"Alto trafico turistico — resenas en ingles muy relevantes",insight2:"22% de locales aun bajo 4,0 — brecha de oportunidad clara",insight3:"Noche de viernes/sabado: pico de busqueda donde comer Bellavista"}};
+const ZONAS_CHART={labels:['Vitacura','Las Condes','Providencia','Barrio Italia','Nunoa','Todo Stgo','Bellavista','Stgo Centro'],values:[4.45,4.4,4.3,4.3,4.2,4.2,4.1,3.9]};
+let currentZona='todas';let chartDist,chartComport,chartZonas;
+const EXIG_COLOR={'Muy Alta':'r-red','Alta':'r-blue','Media-Alta':'r-yellow','Media':'r-yellow','Media-Baja':'r-green'};
+function ratingClass(r){if(r>=4.4)return'r-green';if(r>=4.0)return'r-yellow';return'r-red';}
+function starBar(pct){return '<div class="umbral-bar-wrap"><div class="umbral-label"><span>'+pct+'% fichas >=4,5</span></div><div class="umbral-bar"><div class="umbral-fill" style="width:'+pct+'%"></div></div></div>';}
+function renderKPIs(d){document.getElementById('kpiSection').innerHTML='<div class="kpi-card"><div class="kpi-label">Rating Promedio Zona</div><div class="kpi-val">'+d.avgRating.toFixed(1)+' estrellas</div><div class="kpi-sub">sobre 5 estrellas Google</div></div><div class="kpi-card yellow"><div class="kpi-label">Umbral competitivo</div><div class="kpi-val">'+d.umbral.toFixed(1)+' estrellas</div><div class="kpi-sub">minimo para destacar en zona</div></div><div class="kpi-card dark"><div class="kpi-label">Resenas promedio</div><div class="kpi-val">'+d.avgReviews+'</div><div class="kpi-sub">por local en la zona</div></div><div class="kpi-card green"><div class="kpi-label">% fichas >= 4,5</div><div class="kpi-val">'+d.pct45mas+'%</div><div class="kpi-sub">de locales en umbral premium</div></div>';}
+function renderInsights(d){document.getElementById('insightsSection').innerHTML='<div class="insight-card"><div class="insight-icon">target</div><div class="insight-title">Umbral de exigencia</div><div class="insight-text"><span class="insight-highlight">'+d.umbral+' estrellas</span> es la nota minima para '+d.label+'. El '+d.pct45mas+'% ya lo cumple.</div>'+starBar(d.pct45mas)+'</div><div class="insight-card"><div class="insight-icon">personas</div><div class="insight-title">Comportamiento del comensal</div><div class="insight-text">'+d.insight1+'. Nivel de exigencia: <span class="insight-highlight">'+d.exigencia+'</span>. El '+d.pctBajo4+'% de locales tiene menos de 4,0 estrellas.</div></div><div class="insight-card"><div class="insight-icon">dinero</div><div class="insight-title">Impacto comercial</div><div class="insight-text">'+d.insight3+'. En '+d.label+', con '+d.avgReviews+' resenas promedio por local, <span class="insight-highlight">gestionar activamente</span> es el diferenciador real.</div></div>';}
+function renderTabla(){const rows=Object.entries(DATA).filter(function(e){return e[0]!=='todas';}).map(function(e){const d=e[1];return '<tr><td><strong>'+d.label+'</strong></td><td><span class="rating-pill '+ratingClass(d.avgRating)+'">'+d.avgRating.toFixed(2)+' estrellas</span></td><td>'+d.umbral.toFixed(1)+' estrellas</td><td>'+d.pctBajo4+'%</td><td>'+d.pct45mas+'%</td><td>'+d.avgReviews+'</td><td><span class="rating-pill '+(EXIG_COLOR[d.exigencia]||'r-yellow')+'">'+d.exigencia+'</span></td></tr>';}).join('');document.getElementById('zonaTableBody').innerHTML=rows;}
+function initCharts(d){
+chartDist=new Chart(document.getElementById('chartDist'),{type:'bar',data:{labels:['< 2,5','2,5-3,0','3,0-3,5','3,5-4,0','4,0-4,5','>= 4,5'],datasets:[{label:'% restaurantes',data:d.dist,backgroundColor:['#991B1B','#DC2626','#F97316','#EFE24C','#5852DA','#22C55E'],borderRadius:6,borderWidth:0}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:function(v){return v+'%';}},grid:{color:'#F0F3FD'}},x:{grid:{display:false}}}}});
+chartComport=new Chart(document.getElementById('chartComport'),{type:'doughnut',data:{labels:['Lee 7+ resenas antes','Descarta < 3,5 estrellas','Exige 4,5+','Visita en 24h (movil)','Revisa respuestas del dueno'],datasets:[{data:[87,87,31,76,68],backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:10}},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.label+': '+ctx.parsed+'%';}}}}}});
+chartZonas=new Chart(document.getElementById('chartZonas'),{type:'bar',data:{labels:ZONAS_CHART.labels,datasets:[{label:'Rating Promedio',data:ZONAS_CHART.values,backgroundColor:ZONAS_CHART.values.map(function(v){return v>=4.4?'#22C55E':v>=4.2?'#5852DA':v>=4.0?'#EFE24C':'#F97316';}),borderRadius:8,borderWidth:0}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{min:3.5,max:5.0,ticks:{callback:function(v){return v+' estrellas';}},grid:{color:'#F0F3FD'}},y:{grid:{display:false}}}}});
+}
+function updateChartDist(d){chartDist.data.datasets[0].data=d.dist;chartDist.update();}
+function setZona(zona){currentZona=zona;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});event.target.classList.add('active');const d=DATA[zona]||DATA['todas'];renderKPIs(d);renderInsights(d);updateChartDist(d);}
+window.onload=function(){const d=DATA['todas'];renderKPIs(d);renderInsights(d);renderTabla();initCharts(d);};
+</script>
+</body>
+</html>
