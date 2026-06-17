@@ -759,11 +759,18 @@ function initCharts(d){
   });
   const cd=buildComportData(d);
   chartComport=new Chart(document.getElementById('chartComport'),{
-    type:'doughnut',
+    type:'bar',
     data:{labels:cd.labels,
-      datasets:[{data:cd.values,backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},
-      tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'%'}}}}
+      datasets:[{label:'% comensales',data:cd.values,
+        backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],
+        borderRadius:6,borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.parsed.x+'% de comensales'}}},
+      scales:{
+        x:{min:0,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#F0F3FD'}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}
+      }}
   });
   chartZonas=new Chart(document.getElementById('chartZonas'),{
     type:'bar',
@@ -784,6 +791,7 @@ function updateCharts(d){
   const cd=buildComportData(d);
   chartComport.data.labels=cd.labels;
   chartComport.data.datasets[0].data=cd.values;
+  chartComport.data.datasets[0].backgroundColor=['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'];
   chartComport.update();
   const label=estado.nivel==='nacional'?'Todo Chile':(estado.comuna&&estado.comuna!=='todas'?REGIONES[estado.region].comunas[estado.comuna].label:REGIONES[estado.region].label);
   document.getElementById('chartComportDesc').textContent=`% que actúa según calificación del local · ${label}`;
