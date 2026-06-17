@@ -190,7 +190,7 @@ footer{background:#201E48;color:#aaa;text-align:center;font-size:11px;padding:14
   <!-- CHARTS -->
   <div class="charts-grid">
     <div class="chart-card"><div class="chart-title">Distribución de calificaciones</div><div class="chart-desc">% de restaurantes por rango de estrellas</div><canvas id="chartDist" height="200"></canvas></div>
-    <div class="chart-card"><div class="chart-title">Comportamiento del comensal buscador</div><div class="chart-desc">% que actúa según calificación del local</div><canvas id="chartComport" height="200"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Posicionamiento de fichas en zona</div><div class="chart-desc" id="chartComportDesc">Distribución por nivel competitivo · Todo Chile</div><canvas id="chartComport" height="200"></canvas></div>
     <div class="chart-card full"><div class="chart-title" id="chartZonasTitle">Comparativa por región · Todo Chile</div><div class="chart-desc">Rating promedio Google Maps</div><canvas id="chartZonas" height="100"></canvas></div>
   </div>
 
@@ -715,6 +715,23 @@ function buildZonasData(){
   }
 }
 
+function buildComportData(d){
+  const dist=d.dist||[0,0,0,0,0,0];
+  const premium=dist[5]||0;
+  const competitivo=dist[4]||0;
+  const vulnerable=(dist[0]||0)+(dist[1]||0)+(dist[2]||0)+(dist[3]||0);
+  // Use placeholders when all zero to avoid empty chart
+  const total=premium+competitivo+vulnerable||100;
+  return {
+    labels:[
+      `Premium ≥4,5 ⭐ (${premium}%)`,
+      `Competitivo 4,0–4,5 ⭐ (${competitivo}%)`,
+      `Vulnerable < 4,0 ⭐ (${vulnerable}%)`
+    ],
+    values:[premium||0, competitivo||0, vulnerable||0]
+  };
+}
+
 function initCharts(d){
   const zd=buildZonasData();
   chartDist=new Chart(document.getElementById('chartDist'),{
@@ -724,10 +741,11 @@ function initCharts(d){
     options:{responsive:true,plugins:{legend:{display:false}},
       scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:'#F0F3FD'}},x:{grid:{display:false}}}}
   });
+  const cd=buildComportData(d);
   chartComport=new Chart(document.getElementById('chartComport'),{
     type:'doughnut',
-    data:{labels:['Lee 7+ reseñas antes','Descarta < 3,5 estrellas','Exige 4,5+','Visita en 24h (móvil)','Revisa respuestas del dueño'],
-      datasets:[{data:[87,87,31,76,68],backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],borderWidth:2,borderColor:'#fff'}]},
+    data:{labels:cd.labels,
+      datasets:[{data:cd.values,backgroundColor:['#22C55E','#5852DA','#F97316'],borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},
       tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'%'}}}}
   });
@@ -747,6 +765,12 @@ function updateCharts(d){
   if(!chartDist) return;
   chartDist.data.datasets[0].data=d.dist;
   chartDist.update();
+  const cd=buildComportData(d);
+  chartComport.data.labels=cd.labels;
+  chartComport.data.datasets[0].data=cd.values;
+  chartComport.update();
+  const label=estado.nivel==='nacional'?'Todo Chile':(estado.comuna&&estado.comuna!=='todas'?REGIONES[estado.region].comunas[estado.comuna].label:REGIONES[estado.region].label);
+  document.getElementById('chartComportDesc').textContent=`Distribución por nivel competitivo · ${label}`;
   const zd=buildZonasData();
   chartZonas.data.labels=zd.labels;
   chartZonas.data.datasets[0].data=zd.values;
