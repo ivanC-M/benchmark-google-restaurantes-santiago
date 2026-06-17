@@ -779,7 +779,7 @@ function initCharts(d){
         backgroundColor:zd.values.map(v=>v>=4.6?'#22C55E':v>=4.5?'#5852DA':v>=4.4?'#EFE24C':'#F97316'),
         borderRadius:6,borderWidth:0}]},
     options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},
-      scales:{x:{min:3.4,max:5.0,ticks:{callback:v=>v+' ⭐'},grid:{color:'#F0F3FD'}},y:{grid:{display:false}}}}
+      scales:{x:{min:3.4,max:5.0,ticks:{callback:v=>Number(v.toFixed(1))+' ⭐'},grid:{color:'#F0F3FD'}},y:{grid:{display:false}}}}
   });
   document.getElementById('chartZonasTitle').textContent=zd.title;
 }
