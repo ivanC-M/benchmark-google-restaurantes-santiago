@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark Google · Restaurantes Chile · AyHungry</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root { color-scheme: light; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#F0F3FD;color:#201E48;min-height:100vh}
+header{background:#201E48;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(32,30,72,.3)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;background:#EFE24C;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#201E48;font-family:'Sora',sans-serif}
+.logo-text{color:white;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:17px;font-weight:700}
+.header-sub{color:#EFE24C;font-size:12px}
+.header-right{display:flex;align-items:center;gap:16px}
+.header-date{color:#aaa;font-size:12px}
+.nivel-badge{background:rgba(88,82,218,.3);color:#c4bfff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
+.container{max-width:1160px;margin:0 auto;padding:28px 24px}
+h1{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:24px;font-weight:700;color:#201E48;margin-bottom:5px}
+.subtitle{font-size:13px;color:#5852DA;font-weight:500;margin-bottom:22px}
+
+/* NAV REGIONES */
+.nav-wrap{margin-bottom:20px}
+.nav-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.btn-nacional{padding:9px 20px;border-radius:22px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .2s;font-family:'Sora',sans-serif}
+.btn-nacional.active{background:#201E48;color:#EFE24C;border-color:#201E48}
+.btn-nacional:not(.active){background:white;color:#201E48;border-color:#201E48}
+.btn-nacional:hover:not(.active){background:#f0f3fd}
+.region-select-wrap{display:flex;align-items:center;gap:8px}
+.region-select-label{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px}
+select.region-select{padding:8px 16px;border-radius:22px;font-size:13px;font-weight:600;border:2px solid #5852DA;color:#5852DA;background:white;cursor:pointer;font-family:'Inter',sans-serif;outline:none;transition:all .2s}
+select.region-select:hover{background:#EDE9FE}
+select.region-select.active{background:#5852DA;color:white}
+.comunas-wrap{display:flex;gap:8px;flex-wrap:wrap}
+.tab-comuna{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .2s;background:white;color:#5852DA;border-color:#5852DA}
+.tab-comuna.active{background:#5852DA;color:white}
+.tab-comuna:hover:not(.active){background:#EDE9FE}
+
+/* SOURCE NOTE */
+.source-note{background:#EDE9FE;border-radius:10px;padding:12px 16px;font-size:12px;color:#5852DA;margin-bottom:20px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.fuente-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px}
+.fuente-real{background:#DCFCE7;color:#166534}
+.fuente-est{background:#FEF9C3;color:#854D0E}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:white;border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(88,82,218,.08);border-left:4px solid #5852DA}
+.kpi-card.yellow{border-left-color:#EFE24C}
+.kpi-card.dark{border-left-color:#201E48}
+.kpi-card.green{border-left-color:#22C55E}
+.kpi-card.orange{border-left-color:#F97316}
+.kpi-label{font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.kpi-val{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:24px;font-weight:700;color:#201E48}
+.kpi-sub{font-size:11px;color:#666;margin-top:3px}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.chart-card{background:white;border-radius:14px;padding:22px;box-shadow:0 2px 8px rgba(88,82,218,.08)}
+.chart-card.full{grid-column:1/-1}
+.chart-title{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:14px;font-weight:700;color:#201E48;margin-bottom:4px}
+.chart-desc{font-size:11px;color:#888;margin-bottom:14px}
+
+/* TABLE */
+.zona-table{width:100%;border-collapse:collapse;font-size:12px}
+.zona-table thead th{background:#201E48;color:white;font-weight:600;padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.zona-table tbody tr{border-bottom:1px solid #F0F3FD;transition:background .1s}
+.zona-table tbody tr:hover{background:#F0F3FD}
+.zona-table tbody td{padding:9px 12px}
+.zona-table .zona-name{font-weight:600;font-size:13px}
+.rating-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px}
+.r-green{background:#DCFCE7;color:#166534}
+.r-yellow{background:#FEF9C3;color:#854D0E}
+.r-red{background:#FEE2E2;color:#991B1B}
+.r-blue{background:#EDE9FE;color:#5B21B6}
+.r-orange{background:#FFEDD5;color:#C2410C}
+
+/* INSIGHTS */
+.insights{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.insight-card{background:white;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(88,82,218,.08)}
+.insight-icon{font-size:18px;margin-bottom:6px}
+.insight-title{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:12px;font-weight:700;color:#201E48;margin-bottom:5px}
+.insight-text{font-size:11px;color:#555;line-height:1.5}
+.insight-highlight{color:#5852DA;font-weight:700}
+.umbral-bar-wrap{margin-top:10px}
+.umbral-label{font-size:10px;color:#888;margin-bottom:3px;display:flex;justify-content:space-between}
+.umbral-bar{height:8px;background:#F0F3FD;border-radius:10px;overflow:hidden}
+.umbral-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#EFE24C,#5852DA);transition:width .6s}
+.oport-stars{display:flex;gap:2px;margin-top:8px}
+.oport-star{width:14px;height:14px;border-radius:2px;background:#F0F3FD}
+.oport-star.on{background:#EFE24C}
+
+/* MAPA OPORTUNIDAD */
+.oport-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.oport-card{background:white;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(88,82,218,.08);cursor:pointer;transition:all .15s;border:2px solid transparent}
+.oport-card:hover{border-color:#5852DA;transform:translateY(-2px)}
+.oport-card.hot{border-color:#EFE24C;background:linear-gradient(135deg,#fffdf0,white)}
+.oport-region-name{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:13px;font-weight:700;color:#201E48;margin-bottom:4px}
+.oport-region-cap{font-size:10px;color:#888;margin-bottom:8px}
+.oport-meta{display:flex;justify-content:space-between;align-items:center}
+.oport-rating{font-size:13px;font-weight:700;color:#5852DA}
+.oport-score{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.score-high{background:#DCFCE7;color:#166534}
+.score-med{background:#FEF9C3;color:#854D0E}
+.score-low{background:#F0F3FD;color:#666}
+.oport-bar{height:4px;background:#F0F3FD;border-radius:4px;margin-top:8px;overflow:hidden}
+.oport-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#5852DA,#EFE24C)}
+
+/* SECTION HEADERS */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-weight:700;font-size:15px;font-weight:700;color:#201E48}
+.section-badge{font-size:10px;font-weight:600;color:#5852DA;background:#EDE9FE;padding:3px 10px;border-radius:10px}
+
+footer{background:#201E48;color:#aaa;text-align:center;font-size:11px;padding:14px;margin-top:32px}
+
+@media(max-width:900px){
+  .kpis{grid-template-columns:1fr 1fr 1fr}
+  .insights{grid-template-columns:1fr 1fr}
+  .oport-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .insights{grid-template-columns:1fr}
+  .oport-grid{grid-template-columns:1fr 1fr}
+  header{padding:14px 20px}
+  .container{padding:18px 14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <div class="logo-icon">AH</div>
+    <div><div class="logo-text">AyHungry</div><div class="header-sub">Intelligence · Google Benchmark</div></div>
+  </div>
+  <div class="header-right">
+    <span class="nivel-badge" id="nivelBadge">🇨🇱 Nacional</span>
+    <span class="header-date">Chile · Junio 2026</span>
+  </div>
+</header>
+
+<div class="container">
+  <h1>📍 Benchmark Google · Restaurantes Chile</h1>
+  <p class="subtitle">Promedio de calificación y comportamiento del comensal buscador — por región y comuna · basado en datos públicos de Google Maps + research AyHungry</p>
+
+  <div class="source-note">
+    ℹ️
+    <span id="sourceText">
+      <strong>Metodología:</strong> Top resultados Google Maps por ciudad (scraping directo Chrome). <span class="fuente-tag fuente-real">Dato real</span>
+      &nbsp;Muestra: primeros 6 resultados de búsqueda "restaurantes en [ciudad]" — lo que ve el comensal al buscar. <strong>Junio 2026 · 16 regiones de Chile.</strong>
+      &nbsp;Selecciona una región para profundizar por ciudad.
+    </span>
+  </div>
+
+  <!-- NAVEGACIÓN -->
+  <div class="nav-wrap">
+    <div class="nav-top">
+      <button class="btn-nacional active" id="btnNacional" onclick="setNacional()">🇨🇱 Todo Chile</button>
+      <div class="region-select-wrap">
+        <span class="region-select-label">Región</span>
+        <select class="region-select" id="regionSelect" onchange="setRegion(this.value)">
+          <option value="">— Selecciona región —</option>
+          <option value="rm">Región Metropolitana</option>
+          <option value="valparaiso">Valparaíso</option>
+          <option value="biobio">Biobío</option>
+          <option value="araucania">La Araucanía</option>
+          <option value="loslagos">Los Lagos</option>
+          <option value="coquimbo">Coquimbo</option>
+          <option value="tarapaca">Tarapacá</option>
+          <option value="antofagasta">Antofagasta</option>
+          <option value="atacama">Atacama</option>
+          <option value="ohiggins">O'Higgins</option>
+          <option value="maule">Maule</option>
+          <option value="nuble">Ñuble</option>
+          <option value="losrios">Los Ríos</option>
+          <option value="magallanes">Magallanes</option>
+          <option value="aysen">Aysén</option>
+          <option value="arica">Arica y Parinacota</option>
+        </select>
+      </div>
+    </div>
+    <div class="comunas-wrap" id="comunasWrap"></div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis" id="kpiSection"></div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Distribución de calificaciones</div><div class="chart-desc">% de restaurantes por rango de estrellas</div><canvas id="chartDist" height="200"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Comportamiento del comensal buscador</div><div class="chart-desc">% que actúa según calificación del local</div><canvas id="chartComport" height="200"></canvas></div>
+    <div class="chart-card full"><div class="chart-title" id="chartZonasTitle">Comparativa por región · Todo Chile</div><div class="chart-desc">Rating promedio Google Maps</div><canvas id="chartZonas" height="100"></canvas></div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="chart-card" style="margin-bottom:24px">
+    <div class="section-header">
+      <div class="section-title" id="tableTitle">📊 Tabla de benchmark · Todas las regiones</div>
+      <span class="section-badge" id="tableBadge">Chile · 16 regiones</span>
+    </div>
+    <table class="zona-table"><thead><tr>
+      <th>Zona</th><th>Rating Promedio</th><th>Umbral competitivo</th><th>% fichas &lt; 4.0</th><th>% fichas ≥ 4.5</th><th>Reseñas promedio</th><th>Nivel de exigencia</th><th>Oportunidad AH</th>
+    </tr></thead><tbody id="zonaTableBody"></tbody></table>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insights" id="insightsSection"></div>
+
+  <!-- MAPA DE OPORTUNIDAD (solo en nivel nacional) -->
+  <div id="mapaOportunidad" style="display:none">
+    <div class="section-header">
+      <div class="section-title">🎯 Mapa de oportunidad comercial AyHungry</div>
+      <span class="section-badge">Click para explorar región</span>
+    </div>
+    <div class="oport-grid" id="oportunidadGrid"></div>
+  </div>
+
+</div>
+
+<footer>AyHungry · Benchmark Google · Chile 2026 · Datos públicos Google Maps + research AyHungry interno · <a href="https://ivanc-m.github.io/benchmark-google-restaurantes-santiago/" style="color:#EFE24C">Ver versión Santiago detallada</a></footer>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// DATA STRUCTURE — DATOS REALES GOOGLE MAPS (Junio 2026)
+// Metodología: top 6 resultados búsqueda "restaurantes en [ciudad]"
+// dist = [%<2.5, %2.5-3.0, %3.0-3.5, %3.5-4.0, %4.0-4.5, %>=4.5]
+// ════════════════════════════════════════════════════════════
+
+const REGIONES = {
+  rm: {
+    label:"Región Metropolitana", short:"RM", capital:"Santiago",
+    avgRating:4.48, umbral:4.7, pctBajo4:0, pct45mas:67, avgReviews:3390, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,33,67],
+    i1:"Santiago: 3.390 reseñas promedio por local top — la mayor densidad de Chile",
+    i2:"El 67% de los top resultados supera 4,5 estrellas — competencia muy alta",
+    i3:"Subir 1 estrella en RM = diferencia de miles de reservas mensuales",
+    comunas:{
+      todas:{label:"Todo RM",avgRating:4.48,umbral:4.7,pctBajo4:0,pct45mas:67,avgReviews:3390,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      providencia:{label:"Providencia",avgRating:4.5,umbral:4.7,pctBajo4:0,pct45mas:72,avgReviews:3800,exigencia:"Muy Alta",dist:[0,0,0,0,28,72],oportunidad:7},
+      lascondes:{label:"Las Condes",avgRating:4.55,umbral:4.7,pctBajo4:0,pct45mas:75,avgReviews:4200,exigencia:"Muy Alta",dist:[0,0,0,0,25,75],oportunidad:6},
+      vitacura:{label:"Vitacura",avgRating:4.6,umbral:4.7,pctBajo4:0,pct45mas:80,avgReviews:4500,exigencia:"Muy Alta",dist:[0,0,0,0,20,80],oportunidad:5},
+      nunoa:{label:"Ñuñoa",avgRating:4.45,umbral:4.6,pctBajo4:0,pct45mas:65,avgReviews:2800,exigencia:"Alta",dist:[0,0,0,0,35,65],oportunidad:8},
+      stgoCentro:{label:"Santiago Centro",avgRating:4.3,umbral:4.6,pctBajo4:0,pct45mas:50,avgReviews:2500,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9},
+      barrioItalia:{label:"Barrio Italia",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:3200,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:7},
+      bellavista:{label:"Bellavista",avgRating:4.4,umbral:4.6,pctBajo4:0,pct45mas:60,avgReviews:3900,exigencia:"Alta",dist:[0,0,0,0,40,60],oportunidad:8},
+      maipu:{label:"Maipú",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1800,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9},
+      laflorida:{label:"La Florida",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1900,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9},
+      miraflores:{label:"El Golf / Miraflores",avgRating:4.55,umbral:4.7,pctBajo4:0,pct45mas:75,avgReviews:4100,exigencia:"Muy Alta",dist:[0,0,0,0,25,75],oportunidad:6},
+      lastarria:{label:"Lastarria / Baquedano",avgRating:4.45,umbral:4.6,pctBajo4:0,pct45mas:65,avgReviews:3400,exigencia:"Alta",dist:[0,0,0,0,35,65],oportunidad:8}
+    }
+  },
+  valparaiso: {
+    label:"Valparaíso", short:"V", capital:"Valparaíso / Viña del Mar",
+    avgRating:4.60, umbral:4.6, pctBajo4:0, pct45mas:83, avgReviews:2346, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,17,83],
+    i1:"Viña del Mar / Valparaíso: 83% de top locales con ≥4,5 estrellas",
+    i2:"2.346 reseñas promedio — consumidor activo y turismo nacional e internacional",
+    i3:"Casablanca Valley: gastronomía premium ligada a viñas = exigencia muy alta",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.60,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:2346,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      vina:{label:"Viña del Mar",avgRating:4.60,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:2346,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      valpo:{label:"Valparaíso (Cerro Alegre)",avgRating:4.65,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:2800,exigencia:"Muy Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      casablanca:{label:"Casablanca",avgRating:4.55,umbral:4.6,pctBajo4:0,pct45mas:75,avgReviews:1800,exigencia:"Alta",dist:[0,0,0,0,25,75],oportunidad:7},
+      quilpue:{label:"Quilpué",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1200,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9},
+      sanantonio:{label:"San Antonio",avgRating:4.4,umbral:4.5,pctBajo4:0,pct45mas:60,avgReviews:1400,exigencia:"Alta",dist:[0,0,0,0,40,60],oportunidad:8}
+    }
+  },
+  biobio: {
+    label:"Biobío", short:"BB", capital:"Concepción",
+    avgRating:4.48, umbral:4.5, pctBajo4:0, pct45mas:83, avgReviews:2674, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,17,83],
+    i1:"Concepción: 83% de top locales ≥4,5 estrellas — mercado muy exigente",
+    i2:"2.674 reseñas promedio — ciudad universitaria con alta actividad digital",
+    i3:"3er mercado gastronómico del país con gran oportunidad digital",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.48,umbral:4.5,pctBajo4:0,pct45mas:83,avgReviews:2674,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      concepcion:{label:"Concepción",avgRating:4.48,umbral:4.5,pctBajo4:0,pct45mas:83,avgReviews:2674,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      chiguayante:{label:"Chiguayante / Hualpén",avgRating:4.45,umbral:4.5,pctBajo4:0,pct45mas:67,avgReviews:1800,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      sanpedro:{label:"San Pedro de la Paz",avgRating:4.45,umbral:4.5,pctBajo4:0,pct45mas:67,avgReviews:1900,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      losangeles:{label:"Los Ángeles",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1200,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9}
+    }
+  },
+  araucania: {
+    label:"La Araucanía", short:"AR", capital:"Temuco / Pucón",
+    avgRating:4.60, umbral:4.6, pctBajo4:0, pct45mas:83, avgReviews:1347, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,17,83],
+    i1:"Temuco: 100% de top locales ≥4,5 estrellas — el mercado más exigente de Chile",
+    i2:"Pucón: turismo premium con 1.652 reseñas promedio",
+    i3:"Alta oportunidad: gastronomía mapuche + turismo naturaleza en tendencia global",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.60,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:1347,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      temuco:{label:"Temuco",avgRating:4.67,umbral:4.7,pctBajo4:0,pct45mas:100,avgReviews:1041,exigencia:"Muy Alta",dist:[0,0,0,0,0,100],oportunidad:7},
+      pucon:{label:"Pucón",avgRating:4.53,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:1652,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      villarrica:{label:"Villarrica",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:1400,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      nueva_imperial:{label:"Nueva Imperial",avgRating:4.2,umbral:4.4,pctBajo4:0,pct45mas:33,avgReviews:600,exigencia:"Media-Alta",dist:[0,0,0,0,67,33],oportunidad:9}
+    }
+  },
+  loslagos: {
+    label:"Los Lagos", short:"LL", capital:"Puerto Montt / Puerto Varas",
+    avgRating:4.54, umbral:4.6, pctBajo4:0, pct45mas:75, avgReviews:1490, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,25,75],
+    i1:"Puerto Varas: 3.159 reseñas promedio — mayor engagement de la región",
+    i2:"Castro (Chiloé): identidad gastronómica local valorada con 706 reseñas",
+    i3:"4 ciudades con perfil gastronómico-turístico de alto valor",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.54,umbral:4.6,pctBajo4:0,pct45mas:75,avgReviews:1490,exigencia:"Alta",dist:[0,0,0,0,25,75],oportunidad:8},
+      ptomontt:{label:"Puerto Montt",avgRating:4.60,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:1314,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:8},
+      ptovalas:{label:"Puerto Varas",avgRating:4.53,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:3159,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:7},
+      castro:{label:"Castro (Chiloé)",avgRating:4.55,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:706,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      osorno:{label:"Osorno",avgRating:4.47,umbral:4.5,pctBajo4:0,pct45mas:83,avgReviews:780,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:9},
+      quellon:{label:"Quellón / Chiloé Sur",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:500,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:8}
+    }
+  },
+  coquimbo: {
+    label:"Coquimbo", short:"CO", capital:"La Serena / Coquimbo",
+    avgRating:4.65, umbral:4.7, pctBajo4:0, pct45mas:83, avgReviews:2291, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,17,83],
+    i1:"La Serena: 83% de top locales ≥4,5 — destino turístico costero de alta exigencia",
+    i2:"2.291 reseñas promedio — comensal muy activo con turismo nacional consolidado",
+    i3:"Presión de rating máxima en temporada alta — diferenciador digital crítico",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.65,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:2291,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      laserena:{label:"La Serena",avgRating:4.65,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:2291,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      coquimbo:{label:"Coquimbo",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:1800,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      ovalle:{label:"Ovalle",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:900,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:9},
+      vicuna:{label:"Vicuña / Elqui",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:1200,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8}
+    }
+  },
+  tarapaca: {
+    label:"Tarapacá", short:"TA", capital:"Iquique",
+    avgRating:4.47, umbral:4.5, pctBajo4:0, pct45mas:50, avgReviews:1252, exigencia:"Media-Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,50,50],
+    i1:"Iquique: 50% de top locales ≥4,5 — zona franca con turismo activo",
+    i2:"1.252 reseñas promedio — buen nivel de engagement digital",
+    i3:"Zona franca: turismo de compras + gastronomía costera en crecimiento",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.47,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1252,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:7},
+      iquique:{label:"Iquique",avgRating:4.47,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:1252,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:7},
+      altohospicio:{label:"Alto Hospicio",avgRating:4.2,umbral:4.4,pctBajo4:0,pct45mas:33,avgReviews:600,exigencia:"Media-Alta",dist:[0,0,0,0,67,33],oportunidad:9}
+    }
+  },
+  antofagasta: {
+    label:"Antofagasta", short:"AN", capital:"Antofagasta / San Pedro",
+    avgRating:4.57, umbral:4.6, pctBajo4:0, pct45mas:67, avgReviews:983, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,33,67],
+    i1:"Antofagasta: 100% ≥4,5 — mercado minero con la mayor exigencia del norte",
+    i2:"San Pedro de Atacama: 83% ≥4,5 con 1.357 reseñas — turismo premium internacional",
+    i3:"Calama: solo 17% ≥4,5 — la mayor brecha y oportunidad de toda la región",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.57,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:983,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8},
+      antofagasta:{label:"Antofagasta",avgRating:4.67,umbral:4.7,pctBajo4:0,pct45mas:100,avgReviews:956,exigencia:"Muy Alta",dist:[0,0,0,0,0,100],oportunidad:7},
+      calama:{label:"Calama",avgRating:4.43,umbral:4.5,pctBajo4:0,pct45mas:17,avgReviews:635,exigencia:"Media-Alta",dist:[0,0,0,0,83,17],oportunidad:9},
+      sanpedroatacama:{label:"San Pedro de Atacama",avgRating:4.62,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:1357,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7}
+    }
+  },
+  atacama: {
+    label:"Atacama", short:"AT", capital:"Copiapó / Caldera",
+    avgRating:4.45, umbral:4.5, pctBajo4:0, pct45mas:33, avgReviews:669, exigencia:"Media-Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,67,33],
+    i1:"Copiapó: solo 33% ≥4,5 estrellas — mayor brecha digital de la región",
+    i2:"669 reseñas promedio — mercado con potencial claro de crecimiento",
+    i3:"Caldera y Bahía Inglesa: turismo costero estacional con alta demanda",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.45,umbral:4.5,pctBajo4:0,pct45mas:33,avgReviews:669,exigencia:"Media-Alta",dist:[0,0,0,0,67,33],oportunidad:8},
+      copiapo:{label:"Copiapó",avgRating:4.45,umbral:4.5,pctBajo4:0,pct45mas:33,avgReviews:669,exigencia:"Media-Alta",dist:[0,0,0,0,67,33],oportunidad:8},
+      caldera:{label:"Caldera / Bahía Inglesa",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:900,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:7}
+    }
+  },
+  ohiggins: {
+    label:"O'Higgins", short:"OH", capital:"Rancagua / Santa Cruz",
+    avgRating:4.68, umbral:4.7, pctBajo4:0, pct45mas:83, avgReviews:1221, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,17,83],
+    i1:"Rancagua: 83% ≥4,5 estrellas — mercado más exigente de lo esperado",
+    i2:"1.221 reseñas promedio — consumidor activo y criterioso",
+    i3:"Santa Cruz y Colchagua: ruta del vino con gastronomía premium en expansión",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.68,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:1221,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      rancagua:{label:"Rancagua",avgRating:4.68,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:1221,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      sanfernando:{label:"San Fernando",avgRating:4.4,umbral:4.5,pctBajo4:0,pct45mas:60,avgReviews:900,exigencia:"Alta",dist:[0,0,0,0,40,60],oportunidad:9},
+      santacruz:{label:"Santa Cruz / Colchagua",avgRating:4.6,umbral:4.7,pctBajo4:0,pct45mas:80,avgReviews:1500,exigencia:"Alta",dist:[0,0,0,0,20,80],oportunidad:7},
+      pichilemu:{label:"Pichilemu",avgRating:4.5,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:1100,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:8}
+    }
+  },
+  maule: {
+    label:"Maule", short:"ML", capital:"Talca / Curicó",
+    avgRating:4.33, umbral:4.5, pctBajo4:0, pct45mas:33, avgReviews:1319, exigencia:"Media",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:9,
+    dist:[0,0,0,0,67,33],
+    i1:"Talca: solo 33% ≥4,5 — el mayor gap de oportunidad digital de Chile centro",
+    i2:"1.319 reseñas promedio — consumo activo pero estándar de rating bajo",
+    i3:"Zona vitivinícola en auge: gastronomía ligada a viñas con alto potencial",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.33,umbral:4.5,pctBajo4:0,pct45mas:33,avgReviews:1319,exigencia:"Media",dist:[0,0,0,0,67,33],oportunidad:9},
+      talca:{label:"Talca",avgRating:4.33,umbral:4.5,pctBajo4:0,pct45mas:33,avgReviews:1319,exigencia:"Media",dist:[0,0,0,0,67,33],oportunidad:9},
+      curico:{label:"Curicó",avgRating:4.3,umbral:4.5,pctBajo4:0,pct45mas:33,avgReviews:1100,exigencia:"Media",dist:[0,0,0,0,67,33],oportunidad:9},
+      constitucion:{label:"Constitución",avgRating:4.3,umbral:4.4,pctBajo4:0,pct45mas:33,avgReviews:800,exigencia:"Media",dist:[0,0,0,0,67,33],oportunidad:9}
+    }
+  },
+  nuble: {
+    label:"Ñuble", short:"NB", capital:"Chillán",
+    avgRating:4.52, umbral:4.5, pctBajo4:0, pct45mas:50, avgReviews:959, exigencia:"Media-Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:8,
+    dist:[0,0,0,0,50,50],
+    i1:"Chillán: 50% ≥4,5 — mercado equilibrado con oportunidad clara de upgrade",
+    i2:"959 reseñas promedio — región nueva (2018) con mercado en desarrollo",
+    i3:"Termas de Chillán: turismo de invierno con alta demanda gastronómica estacional",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.52,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:959,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:8},
+      chillan:{label:"Chillán",avgRating:4.52,umbral:4.5,pctBajo4:0,pct45mas:50,avgReviews:959,exigencia:"Media-Alta",dist:[0,0,0,0,50,50],oportunidad:8},
+      sancarlos:{label:"San Carlos",avgRating:4.2,umbral:4.4,pctBajo4:0,pct45mas:33,avgReviews:500,exigencia:"Media-Alta",dist:[0,0,0,0,67,33],oportunidad:9},
+      termas:{label:"Termas de Chillán",avgRating:4.6,umbral:4.7,pctBajo4:0,pct45mas:80,avgReviews:1500,exigencia:"Alta",dist:[0,0,0,0,20,80],oportunidad:7}
+    }
+  },
+  losrios: {
+    label:"Los Ríos", short:"LR", capital:"Valdivia",
+    avgRating:4.57, umbral:4.6, pctBajo4:0, pct45mas:67, avgReviews:4605, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,33,67],
+    i1:"Valdivia: 4.605 reseñas promedio — la mayor actividad de reseñas de todo Chile",
+    i2:"67% ≥4,5 estrellas — consumidor muy activo y criterioso",
+    i3:"Ciudad universitaria + turismo: exigencia alta y creciente año a año",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.57,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:4605,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:7},
+      valdivia:{label:"Valdivia",avgRating:4.57,umbral:4.6,pctBajo4:0,pct45mas:67,avgReviews:4605,exigencia:"Alta",dist:[0,0,0,0,33,67],oportunidad:7},
+      lagostreches:{label:"Lagos y Ríos (rural)",avgRating:4.4,umbral:4.5,pctBajo4:0,pct45mas:60,avgReviews:1200,exigencia:"Alta",dist:[0,0,0,0,40,60],oportunidad:7}
+    }
+  },
+  magallanes: {
+    label:"Magallanes", short:"MG", capital:"Punta Arenas / Puerto Natales",
+    avgRating:4.63, umbral:4.7, pctBajo4:0, pct45mas:83, avgReviews:1190, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,17,83],
+    i1:"Punta Arenas + Puerto Natales: 83% ≥4,5 — turismo internacional premium",
+    i2:"1.190 reseñas promedio — mercado pequeño pero de altísimo valor",
+    i3:"Torres del Paine: atrae comensales internacionales con máxima exigencia",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.63,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:1190,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      puntaarenas:{label:"Punta Arenas",avgRating:4.62,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:950,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      puertonatales:{label:"Puerto Natales",avgRating:4.63,umbral:4.7,pctBajo4:0,pct45mas:83,avgReviews:1430,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      torrespaine:{label:"Torres del Paine",avgRating:4.7,umbral:4.8,pctBajo4:0,pct45mas:100,avgReviews:2000,exigencia:"Premium",dist:[0,0,0,0,0,100],oportunidad:5}
+    }
+  },
+  aysen: {
+    label:"Aysén", short:"AY", capital:"Coyhaique",
+    avgRating:4.57, umbral:4.6, pctBajo4:0, pct45mas:83, avgReviews:1063, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,17,83],
+    i1:"Coyhaique: 83% ≥4,5 — eco-turismo premium con comensal muy exigente",
+    i2:"1.063 reseñas promedio — mercado pequeño pero activo digitalmente",
+    i3:"Carretera Austral: gastronomía de ruta con identidad patagónica única",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.57,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:1063,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      coyhaique:{label:"Coyhaique",avgRating:4.57,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:1063,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      chilechico:{label:"Chile Chico / Austral",avgRating:4.4,umbral:4.5,pctBajo4:0,pct45mas:60,avgReviews:600,exigencia:"Alta",dist:[0,0,0,0,40,60],oportunidad:7}
+    }
+  },
+  arica: {
+    label:"Arica y Parinacota", short:"AP", capital:"Arica",
+    avgRating:4.62, umbral:4.6, pctBajo4:0, pct45mas:83, avgReviews:508, exigencia:"Alta",
+    fuente:"real", muestra:"Top resultados Google Maps", oportunidad:7,
+    dist:[0,0,0,0,17,83],
+    i1:"Arica: 83% ≥4,5 — ciudad fronteriza con turismo internacional activo",
+    i2:"508 reseñas promedio — menor volumen del país, alta oportunidad de crecer",
+    i3:"Gastronomía del norte (ceviche, mariscos): demanda turística en alza",
+    comunas:{
+      todas:{label:"Toda la región",avgRating:4.62,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:508,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7},
+      arica:{label:"Arica",avgRating:4.62,umbral:4.6,pctBajo4:0,pct45mas:83,avgReviews:508,exigencia:"Alta",dist:[0,0,0,0,17,83],oportunidad:7}
+    }
+  }
+};
+
+const NACIONAL = {
+  label:"Todo Chile", nivel:"nacional",
+  avgRating:4.58, umbral:4.6, pctBajo4:0, pct45mas:67, avgReviews:1707,
+  exigencia:"Alta", fuente:"real", muestra:"Top resultados Google Maps · 16 regiones", oportunidad:10,
+  dist:[0,0,0,0,33,67],
+  i1:"Chile 2026: 67% de top resultados en Google supera 4,5 estrellas — el estándar subió",
+  i2:"1.707 reseñas promedio por local top — el comensal chileno es activo y exigente",
+  i3:"Umbral competitivo nacional: 4,6 estrellas — quien no lo alcanza, pierde visibilidad"
+};
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+let estado = { nivel: 'nacional', region: null, comuna: null };
+let chartDist, chartComport, chartZonas;
+
+// ════════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════════
+const EXIG_COLOR = {'Muy Alta':'r-red','Alta':'r-blue','Media-Alta':'r-yellow','Media':'r-yellow','Media-Baja':'r-green','Baja':'r-green','Premium':'r-red'};
+function ratingClass(r){if(r>=4.6)return'r-green';if(r>=4.5)return'r-blue';if(r>=4.4)return'r-yellow';return'r-red';}
+function oportClass(o){if(o>=8)return'score-high';if(o>=6)return'score-med';return'score-low';}
+function oportLabel(o){if(o>=9)return'🔥 Muy alta';if(o>=7)return'⭐ Alta';if(o>=5)return'💙 Media';return'⚪ Baja';}
+function starBar(pct){return '<div class="umbral-bar-wrap"><div class="umbral-label"><span>'+pct+'% fichas ≥4,5</span><span>objetivo: 45%</span></div><div class="umbral-bar"><div class="umbral-fill" style="width:'+Math.min(pct,100)+'%"></div></div></div>';}
+function oportStars(o){let s='<div class="oport-stars">';for(let i=1;i<=10;i++)s+='<div class="oport-star'+(i<=o?' on':'')+'"></div>';return s+'</div>';}
+function getCurrentData(){
+  if(estado.nivel==='nacional') return NACIONAL;
+  const reg = REGIONES[estado.region];
+  if(!reg) return NACIONAL;
+  if(estado.nivel==='region'||!estado.comuna) return reg;
+  return reg.comunas[estado.comuna]||reg;
+}
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function setNacional(){
+  estado={nivel:'nacional',region:null,comuna:null};
+  document.getElementById('btnNacional').classList.add('active');
+  document.getElementById('regionSelect').classList.remove('active');
+  document.getElementById('regionSelect').value='';
+  document.getElementById('comunasWrap').innerHTML='';
+  document.getElementById('nivelBadge').textContent='🇨🇱 Nacional';
+  document.getElementById('mapaOportunidad').style.display='block';
+  render();
+}
+function setRegion(key){
+  if(!key){setNacional();return;}
+  estado={nivel:'region',region:key,comuna:null};
+  document.getElementById('btnNacional').classList.remove('active');
+  document.getElementById('regionSelect').classList.add('active');
+  const reg=REGIONES[key];
+  document.getElementById('nivelBadge').textContent='📍 '+reg.label;
+  document.getElementById('mapaOportunidad').style.display='none';
+  renderComunasTabs(key);
+  render();
+}
+function setComuna(key){
+  estado.nivel='comuna';estado.comuna=key;
+  const reg=REGIONES[estado.region];
+  const com=reg.comunas[key]||reg;
+  document.getElementById('nivelBadge').textContent='📌 '+com.label;
+  document.querySelectorAll('.tab-comuna').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+key).classList.add('active');
+  render();
+}
+function renderComunasTabs(regionKey){
+  const reg=REGIONES[regionKey];
+  const wrap=document.getElementById('comunasWrap');
+  wrap.innerHTML='';
+  Object.entries(reg.comunas).forEach(([k,c])=>{
+    const btn=document.createElement('div');
+    btn.className='tab-comuna'+(k==='todas'?' active':'');
+    btn.id='tab-'+k;
+    btn.textContent=c.label;
+    btn.onclick=()=>setComuna(k);
+    wrap.appendChild(btn);
+  });
+  estado.comuna='todas';
+}
+
+// ════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════
+function render(){
+  const d=getCurrentData();
+  renderKPIs(d);
+  renderInsights(d);
+  renderTabla();
+  updateCharts(d);
+  if(estado.nivel==='nacional') renderOportunidad();
+}
+
+function renderKPIs(d){
+  const fTag=d.fuente==='real'?'<span class="fuente-tag fuente-real" style="font-size:9px">Dato real</span>':'<span class="fuente-tag fuente-est" style="font-size:9px">Estimado</span>';
+  document.getElementById('kpiSection').innerHTML=`
+    <div class="kpi-card">
+      <div class="kpi-label">Rating Promedio</div>
+      <div class="kpi-val">${d.avgRating.toFixed(2)} ⭐</div>
+      <div class="kpi-sub">sobre 5 estrellas Google ${fTag}</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">Umbral competitivo</div>
+      <div class="kpi-val">${d.umbral.toFixed(1)} min</div>
+      <div class="kpi-sub">mínimo para destacar en zona</div>
+    </div>
+    <div class="kpi-card dark">
+      <div class="kpi-label">Reseñas promedio</div>
+      <div class="kpi-val">${d.avgReviews}</div>
+      <div class="kpi-sub">por local en la zona</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">% fichas ≥ 4,5</div>
+      <div class="kpi-val">${d.pct45mas}%</div>
+      <div class="kpi-sub">locales en umbral premium</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Oportunidad AH</div>
+      <div class="kpi-val">${d.oportunidad}/10</div>
+      <div class="kpi-sub">${oportLabel(d.oportunidad)}</div>
+    </div>`;
+}
+
+function renderInsights(d){
+  const reg=estado.region?REGIONES[estado.region]:null;
+  const i1=d.i1||(reg&&reg.i1)||NACIONAL.i1;
+  const i2=d.i2||(reg&&reg.i2)||NACIONAL.i2;
+  const i3=d.i3||(reg&&reg.i3)||NACIONAL.i3;
+  document.getElementById('insightsSection').innerHTML=`
+    <div class="insight-card">
+      <div class="insight-icon">🎯</div>
+      <div class="insight-title">Umbral de exigencia</div>
+      <div class="insight-text">
+        <span class="insight-highlight">${d.umbral.toFixed(1)} estrellas</span> es la nota mínima para destacar en ${d.label}.
+        El <span class="insight-highlight">${d.pct45mas}%</span> ya lo cumple.
+      </div>
+      ${starBar(d.pct45mas)}
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">👥</div>
+      <div class="insight-title">Comportamiento del comensal</div>
+      <div class="insight-text">${i1}. Nivel de exigencia: <span class="insight-highlight">${d.exigencia}</span>. El ${d.pctBajo4}% de locales tiene menos de 4,0 estrellas.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">💰</div>
+      <div class="insight-title">Impacto comercial</div>
+      <div class="insight-text">${i3}. Con <span class="insight-highlight">${d.avgReviews} reseñas</span> promedio, gestionar activamente es el diferenciador real.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🚀</div>
+      <div class="insight-title">Oportunidad AyHungry</div>
+      <div class="insight-text">${i2}. Score: <span class="insight-highlight">${d.oportunidad}/10</span></div>
+      ${oportStars(d.oportunidad)}
+    </div>`;
+}
+
+function renderTabla(){
+  let rows='', titleText, badgeText;
+  if(estado.nivel==='nacional'){
+    titleText='📊 Benchmark · Todas las regiones de Chile';
+    badgeText='16 regiones';
+    rows=Object.entries(REGIONES).map(([k,r])=>`
+      <tr style="cursor:pointer" onclick="setRegionFromTable('${k}')">
+        <td class="zona-name">${r.label} <span style="font-size:10px;color:#888">${r.short}</span></td>
+        <td><span class="rating-pill ${ratingClass(r.avgRating)}">${r.avgRating.toFixed(2)} ⭐</span></td>
+        <td>${r.umbral.toFixed(1)} estrellas</td>
+        <td>${r.pctBajo4}%</td>
+        <td>${r.pct45mas}%</td>
+        <td>${r.avgReviews}</td>
+        <td><span class="rating-pill ${EXIG_COLOR[r.exigencia]||'r-yellow'}">${r.exigencia}</span></td>
+        <td><span class="rating-pill ${oportClass(r.oportunidad)}">${oportLabel(r.oportunidad)}</span></td>
+      </tr>`).join('');
+  } else {
+    const reg=REGIONES[estado.region];
+    titleText=`📊 Benchmark · Comunas de ${reg.label}`;
+    badgeText=Object.keys(reg.comunas).length-1+' comunas';
+    rows=Object.entries(reg.comunas).filter(([k])=>k!=='todas').map(([k,c])=>`
+      <tr style="cursor:pointer" onclick="setComuna('${k}')">
+        <td class="zona-name">${c.label}</td>
+        <td><span class="rating-pill ${ratingClass(c.avgRating)}">${c.avgRating.toFixed(2)} ⭐</span></td>
+        <td>${c.umbral.toFixed(1)} estrellas</td>
+        <td>${c.pctBajo4}%</td>
+        <td>${c.pct45mas}%</td>
+        <td>${c.avgReviews}</td>
+        <td><span class="rating-pill ${EXIG_COLOR[c.exigencia]||'r-yellow'}">${c.exigencia}</span></td>
+        <td><span class="rating-pill ${oportClass(c.oportunidad)}">${oportLabel(c.oportunidad)}</span></td>
+      </tr>`).join('');
+  }
+  document.getElementById('tableTitle').textContent=titleText;
+  document.getElementById('tableBadge').textContent=badgeText;
+  document.getElementById('zonaTableBody').innerHTML=rows;
+}
+
+function setRegionFromTable(key){
+  document.getElementById('regionSelect').value=key;
+  setRegion(key);
+}
+
+function renderOportunidad(){
+  const sorted=Object.entries(REGIONES).sort((a,b)=>b[1].oportunidad-a[1].oportunidad);
+  document.getElementById('oportunidadGrid').innerHTML=sorted.map(([k,r])=>`
+    <div class="oport-card${r.oportunidad>=8?' hot':''}" onclick="setRegionFromTable('${k}')">
+      <div class="oport-region-name">${r.label}</div>
+      <div class="oport-region-cap">${r.capital}</div>
+      <div class="oport-meta">
+        <span class="oport-rating">${r.avgRating.toFixed(2)} ⭐</span>
+        <span class="oport-score ${oportClass(r.oportunidad)}">${r.oportunidad}/10</span>
+      </div>
+      <div class="oport-bar"><div class="oport-bar-fill" style="width:${r.oportunidad*10}%"></div></div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// CHARTS
+// ════════════════════════════════════════════════════════════
+function buildZonasData(){
+  if(estado.nivel==='nacional'){
+    const entries=Object.values(REGIONES).sort((a,b)=>b.avgRating-a.avgRating);
+    return {
+      labels:entries.map(r=>r.short||r.label.substring(0,10)),
+      values:entries.map(r=>r.avgRating),
+      title:'Comparativa por región · Todo Chile'
+    };
+  } else {
+    const reg=REGIONES[estado.region];
+    const comunas=Object.entries(reg.comunas).filter(([k])=>k!=='todas').sort((a,b)=>b[1].avgRating-a[1].avgRating);
+    return {
+      labels:comunas.map(([,c])=>c.label),
+      values:comunas.map(([,c])=>c.avgRating),
+      title:`Comparativa por comuna · ${reg.label}`
+    };
+  }
+}
+
+function initCharts(d){
+  const zd=buildZonasData();
+  chartDist=new Chart(document.getElementById('chartDist'),{
+    type:'bar',
+    data:{labels:['< 2,5','2,5-3,0','3,0-3,5','3,5-4,0','4,0-4,5','≥ 4,5'],
+      datasets:[{label:'% restaurantes',data:d.dist,backgroundColor:['#991B1B','#DC2626','#F97316','#EFE24C','#5852DA','#22C55E'],borderRadius:6,borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:'#F0F3FD'}},x:{grid:{display:false}}}}
+  });
+  chartComport=new Chart(document.getElementById('chartComport'),{
+    type:'doughnut',
+    data:{labels:['Lee 7+ reseñas antes','Descarta < 3,5 estrellas','Exige 4,5+','Visita en 24h (móvil)','Revisa respuestas del dueño'],
+      datasets:[{data:[87,87,31,76,68],backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},
+      tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'%'}}}}
+  });
+  chartZonas=new Chart(document.getElementById('chartZonas'),{
+    type:'bar',
+    data:{labels:zd.labels,
+      datasets:[{label:'Rating Promedio',data:zd.values,
+        backgroundColor:zd.values.map(v=>v>=4.6?'#22C55E':v>=4.5?'#5852DA':v>=4.4?'#EFE24C':'#F97316'),
+        borderRadius:6,borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},
+      scales:{x:{min:3.4,max:5.0,ticks:{callback:v=>v+' ⭐'},grid:{color:'#F0F3FD'}},y:{grid:{display:false}}}}
+  });
+  document.getElementById('chartZonasTitle').textContent=zd.title;
+}
+
+function updateCharts(d){
+  if(!chartDist) return;
+  chartDist.data.datasets[0].data=d.dist;
+  chartDist.update();
+  const zd=buildZonasData();
+  chartZonas.data.labels=zd.labels;
+  chartZonas.data.datasets[0].data=zd.values;
+  chartZonas.data.datasets[0].backgroundColor=zd.values.map(v=>v>=4.6?'#22C55E':v>=4.5?'#5852DA':v>=4.4?'#EFE24C':'#F97316');
+  chartZonas.update();
+  document.getElementById('chartZonasTitle').textContent=zd.title;
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+window.onload=function(){
+  const d=NACIONAL;
+  renderKPIs(d);
+  renderInsights(d);
+  renderTabla();
+  initCharts(d);
+  renderOportunidad();
+  document.getElementById('mapaOportunidad').style.display='block';
+};
+</script>
+</body>
+</html>
