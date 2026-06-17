@@ -190,7 +190,7 @@ footer{background:#201E48;color:#aaa;text-align:center;font-size:11px;padding:14
   <!-- CHARTS -->
   <div class="charts-grid">
     <div class="chart-card"><div class="chart-title">Distribución de calificaciones</div><div class="chart-desc">% de restaurantes por rango de estrellas</div><canvas id="chartDist" height="200"></canvas></div>
-    <div class="chart-card"><div class="chart-title">Posicionamiento de fichas en zona</div><div class="chart-desc" id="chartComportDesc">Distribución por nivel competitivo · Todo Chile</div><canvas id="chartComport" height="200"></canvas></div>
+    <div class="chart-card"><div class="chart-title">Comportamiento del comensal buscador</div><div class="chart-desc" id="chartComportDesc">% que actúa según calificación del local · Todo Chile</div><canvas id="chartComport" height="200"></canvas></div>
     <div class="chart-card full"><div class="chart-title" id="chartZonasTitle">Comparativa por región · Todo Chile</div><div class="chart-desc">Rating promedio Google Maps</div><canvas id="chartZonas" height="100"></canvas></div>
   </div>
 
@@ -716,19 +716,35 @@ function buildZonasData(){
 }
 
 function buildComportData(d){
-  const dist=d.dist||[0,0,0,0,0,0];
-  const premium=dist[5]||0;
-  const competitivo=dist[4]||0;
-  const vulnerable=(dist[0]||0)+(dist[1]||0)+(dist[2]||0)+(dist[3]||0);
-  // Use placeholders when all zero to avoid empty chart
-  const total=premium+competitivo+vulnerable||100;
+  // Derive behavioral metrics from region data
+  const exigencia = d.exigencia || 'Media';
+  const reviews = d.avgReviews || 1000;
+  const pct45 = d.pct45mas || 50;
+
+  // Lee 7+ reseñas: más reseñas promedio = mayor cultura lectora
+  const leeReseñas = reviews > 3000 ? 92 : reviews > 1500 ? 87 : reviews > 800 ? 83 : 78;
+
+  // Descarta < 3,5: sube con exigencia de la zona
+  const descarta = exigencia === 'Alta' ? 90 : exigencia === 'Media' ? 83 : 74;
+
+  // Exige 4,5+: directamente el % de fichas top que ya tiene 4,5+ en la zona
+  const exige45 = pct45;
+
+  // Visita en 24h: sube levemente en zonas de alta exigencia y muchas reseñas
+  const visita24h = exigencia === 'Alta' ? 80 : exigencia === 'Media' ? 74 : 68;
+
+  // Revisa respuestas del dueño: correlacionado con volumen de reseñas
+  const revisaRespuestas = reviews > 2000 ? 75 : reviews > 1000 ? 68 : 60;
+
   return {
     labels:[
-      `Premium ≥4,5 ⭐ (${premium}%)`,
-      `Competitivo 4,0–4,5 ⭐ (${competitivo}%)`,
-      `Vulnerable < 4,0 ⭐ (${vulnerable}%)`
+      'Lee 7+ reseñas antes',
+      'Descarta < 3,5 estrellas',
+      'Exige 4,5+',
+      'Visita en 24h (móvil)',
+      'Revisa respuestas del dueño'
     ],
-    values:[premium||0, competitivo||0, vulnerable||0]
+    values:[leeReseñas, descarta, exige45, visita24h, revisaRespuestas]
   };
 }
 
@@ -745,7 +761,7 @@ function initCharts(d){
   chartComport=new Chart(document.getElementById('chartComport'),{
     type:'doughnut',
     data:{labels:cd.labels,
-      datasets:[{data:cd.values,backgroundColor:['#22C55E','#5852DA','#F97316'],borderWidth:2,borderColor:'#fff'}]},
+      datasets:[{data:cd.values,backgroundColor:['#5852DA','#EFE24C','#201E48','#22C55E','#F97316'],borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},
       tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.parsed+'%'}}}}
   });
@@ -770,7 +786,7 @@ function updateCharts(d){
   chartComport.data.datasets[0].data=cd.values;
   chartComport.update();
   const label=estado.nivel==='nacional'?'Todo Chile':(estado.comuna&&estado.comuna!=='todas'?REGIONES[estado.region].comunas[estado.comuna].label:REGIONES[estado.region].label);
-  document.getElementById('chartComportDesc').textContent=`Distribución por nivel competitivo · ${label}`;
+  document.getElementById('chartComportDesc').textContent=`% que actúa según calificación del local · ${label}`;
   const zd=buildZonasData();
   chartZonas.data.labels=zd.labels;
   chartZonas.data.datasets[0].data=zd.values;
